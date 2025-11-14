@@ -7,51 +7,53 @@
 #
 # Prerequisites:
 # - An existing EKS cluster
-# - An existing AMP workspace
 # - VPC subnets where the scraper will run
 # - Security groups for the scraper
 # - An IAM role with appropriate permissions
 
-apiVersion: amp.aws.upbound.io/v1beta2
+apiVersion: amp.aws.upbound.io/v1beta1
 kind: Workspace
 metadata:
   annotations:
     meta.upbound.io/example-id: amp/v1beta1/scraper
+    crossplane.io/external-name: ws-5db06661-42b2-4ecc-a0e9-a0e3065081e6
   labels:
-    testing.upbound.io/example-name: scraper-demo
-  name: scraper-demo
+    testing.upbound.io/example-name: amp-provider-test-workspace
+  name: amp-provider-test-workspace
 spec:
   forProvider:
     region: us-east-1
-
+  providerConfigRef:
+    name: eks-containersmanagement-161436383136-aws-provider
 ---
-
 apiVersion: amp.aws.upbound.io/v1beta1
 kind: Scraper
 metadata:
   annotations:
     meta.upbound.io/example-id: amp/v1beta1/scraper
+    crossplane.io/external-name: s-b6fc218d-daee-4745-b5ef-adaab2779379
   labels:
-    testing.upbound.io/example-name: scraper-demo
-  name: scraper-demo
+    testing.upbound.io/example-name: amp-provider-test-scraper
+  name: amp-provider-test-scraper
 spec:
   forProvider:
     region: us-east-1
     destination:
     - amp:
-      - workspaceArnSelector:
-          matchLabels:
-            testing.upbound.io/example-name: scraper-demo
+      - workspaceArnRef:
+          name: amp-provider-test-workspace
     source:
     - eks:
-      - clusterArnSelector:
-          matchLabels:
-            testing.upbound.io/example-name: scraper-demo
-        subnetIdsRefs:
-        - name: subnet-1
-        - name: subnet-2
-        securityGroupIdsRefs:
-        - name: scraper-sg
+      - clusterArn: arn:aws:eks:us-east-1:161436383136:cluster/eks-containersmanagement
+        subnetIds:
+        - subnet-078e3d9b9f4b48e20
+        - subnet-020bce96a3715a57c
+        - subnet-0a52fa0b5cecd9676
+        - subnet-07e14b8bc77876364
+        - subnet-03ec8e7a7aadabe2b
+        securityGroupIds:
+        - sg-0eed3a517fc35c007
+        - sg-036c56490d8432a97
     scrapeConfiguration: |
       global:
         scrape_interval: 30s
@@ -107,3 +109,5 @@ spec:
             target_label: __address__
             regex: (.+?)(\\:\\d+)?
             replacement: $1:10249
+  providerConfigRef:
+    name: eks-containersmanagement-161436383136-aws-provider

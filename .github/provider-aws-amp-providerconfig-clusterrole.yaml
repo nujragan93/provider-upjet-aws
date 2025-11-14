@@ -1,0 +1,19 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: provider-aws-amp-providerconfig-access
+rules:
+  - apiGroups:
+      - aws.upbound.io
+    resources:
+      - providerconfigs
+      - providerconfigs/status
+      - providerconfigusages
+      - providerconfigusages/status
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - create

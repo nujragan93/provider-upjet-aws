@@ -18,7 +18,7 @@ export TERRAFORM_PROVIDER_REPO ?= https://github.com/hashicorp/terraform-provide
 export TERRAFORM_DOCS_PATH ?= website/docs/r
 export PROVIDER_NAME
 
-PLATFORMS ?= linux_amd64 linux_arm64
+PLATFORMS ?= linux_arm64
 
 export PROJECT_NAME := $(PROJECT_NAME)
 
@@ -96,7 +96,7 @@ export CROSSPLANE_CLI_VERSION := $(CROSSPLANE_CLI_VERSION)
 
 REGISTRY_ORGS ?= xpkg.upbound.io/upbound
 IMAGES = provider-aws
-BATCH_PLATFORMS ?= linux_amd64,linux_arm64
+BATCH_PLATFORMS ?= linux_arm64
 export BATCH_PLATFORMS := $(BATCH_PLATFORMS)
 
 -include build/makelib/imagelight.mk
@@ -104,7 +104,7 @@ export BATCH_PLATFORMS := $(BATCH_PLATFORMS)
 # ====================================================================================
 # Setup XPKG
 
-XPKG_REG_ORGS ?= xpkg.upbound.io/upbound
+XPKG_REG_ORGS ?= 310865762107.dkr.ecr.us-east-1.amazonaws.com/crossplane
 # NOTE(hasheddan): skip promoting on xpkg.upbound.io as channel tags are
 # inferred.
 XPKG_REG_ORGS_NO_PROMOTE ?= xpkg.upbound.io/upbound
@@ -159,6 +159,19 @@ run: go.build
 	@$(INFO) Running Crossplane locally out-of-cluster . . .
 	@# To see other arguments that can be provided, run the command with --help instead
 	UPBOUND_CONTEXT="local" $(GO_OUT_DIR)/monolith --debug --certs-dir=""
+
+# Run a specific subpackage provider locally
+# Usage: make run-subpackage SUBPACKAGES=amp
+run-subpackage:
+	@if [ -z "$(SUBPACKAGES)" ] || [ "$(SUBPACKAGES)" = "monolith" ]; then \
+		echo "Error: SUBPACKAGES must be set to a specific subpackage (not monolith)"; \
+		echo "Example: make run-subpackage SUBPACKAGES=amp"; \
+		exit 1; \
+	fi
+	@$(MAKE) go.build SUBPACKAGES=$(SUBPACKAGES)
+	@$(INFO) Running $(SUBPACKAGES) provider locally out-of-cluster . . .
+	@# To see other arguments that can be provided, run the command with --help instead
+	UPBOUND_CONTEXT="local" $(GO_OUT_DIR)/$(SUBPACKAGES) --debug --certs-dir=""
 
 # NOTE(hasheddan): we ensure up is installed prior to running platform-specific
 # build steps in parallel to avoid encountering an installation race condition.
