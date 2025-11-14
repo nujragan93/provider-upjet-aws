@@ -34,13 +34,6 @@ var TerraformPluginFrameworkExternalNameConfigs = map[string]config.ExternalName
 	// terraform-plugin-framework
 	"aws_appconfig_environment": appConfigEnvironment(),
 
-	// amp
-	//
-	// Prometheus Scraper can be imported using the ARN: arn:aws:aps:us-west-2:123456789012:scraper/s-12345678-1234-1234-1234-123456789012
-	// ID is a random UUID.
-	// terraform-plugin-framework
-	"aws_prometheus_scraper": config.IdentifierFromProvider,
-
 	// batch
 	// AWS Batch job queue can be imported using the name
 	"aws_batch_job_queue": config.TemplatedStringAsIdentifier("name", fullARNTemplate("batch", "job-queue/{{ .external_name }}")),
@@ -201,6 +194,9 @@ var TerraformPluginSDKExternalNameConfigs = map[string]config.ExternalName{
 	"aws_prometheus_alert_manager_definition": config.IdentifierFromProvider,
 	//
 	"aws_prometheus_rule_group_namespace": config.TemplatedStringAsIdentifier("name", fullARNTemplate("aps", "rulegroupsnamespace/{{ .parameters.workspace_id }}/{{ .external_name }}")),
+	// Prometheus Scraper can be imported using the ARN: arn:aws:aps:us-west-2:123456789012:scraper/s-12345678-1234-1234-1234-123456789012
+	// Terraform returns the full ARN as ID, but AWS API expects just the UUID portion (s-UUID).
+	"aws_prometheus_scraper": config.IdentifierFromProvider,
 	// ID is a random UUID.
 	"aws_prometheus_workspace": config.IdentifierFromProvider,
 
